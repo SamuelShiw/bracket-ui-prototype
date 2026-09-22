@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import {
   Activity,
   Armchair,
@@ -200,7 +200,7 @@ const agendaDemo = [
   { time: '12:30', patient: 'Mateo Quispe', procedure: 'Diagnóstico', status: 'Confirmada', chair: 'Sillón 3' },
 ]
 
-function StatusBadge({ children, tone = 'neutral' }: { children: React.ReactNode; tone?: 'neutral' | 'success' | 'info' | 'warning' }) {
+function StatusBadge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'success' | 'info' | 'warning' }) {
   const tones = {
     neutral: 'bg-[#F0EFEC] text-[#656568]',
     success: 'bg-[#E8F4EE] text-[#287354]',
@@ -289,7 +289,7 @@ function DashboardPage() {
 
 function Metric({ label, value, detail, icon: Icon, accent = false }: { label: string; value: string; detail: string; icon: LucideIcon; accent?: boolean }) {
   return (
-    <div className="surface p-4.5 p-5">
+    <div className="surface p-5">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[.08em] text-bracket-secondary">{label}</p>
@@ -642,7 +642,7 @@ function OdontogramPage() {
           <div className="scrollbar-none overflow-x-auto pb-2">
             <div className="mx-auto min-w-[900px]">
               <p className="mb-1 text-center text-[11px] font-bold uppercase tracking-[.12em] text-bracket-secondary">Arcada superior</p>
-              <div className="grid grid-cols-16 gap-0.5">
+              <div className="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-0.5">
                 {upperTeeth.map((number) => (
                   <Tooth key={number} number={number} selected={selected === number} marked={['16','24'].includes(number)} onClick={() => setSelected(number)} />
                 ))}
@@ -650,7 +650,7 @@ function OdontogramPage() {
 
               <div className="my-5 h-px bg-bracket-border" />
 
-              <div className="grid grid-cols-16 gap-0.5">
+              <div className="grid grid-cols-[repeat(16,minmax(0,1fr))] gap-0.5">
                 {lowerTeeth.map((number) => (
                   <Tooth key={number} number={number} selected={selected === number} marked={['36'].includes(number)} onClick={() => setSelected(number)} />
                 ))}
