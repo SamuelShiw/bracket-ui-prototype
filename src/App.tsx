@@ -35,12 +35,20 @@ const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/agenda', label: 'Agenda', icon: CalendarDays },
   { to: '/pacientes', label: 'Pacientes', icon: Users },
+  { to: '/ortodoncia', label: 'Ortodoncia', icon: Activity },
+  { to: '/finanzas', label: 'Finanzas', icon: CircleDollarSign },
+  { to: '/inventario', label: 'Inventario', icon: PackageOpen },
+  { to: '/configuracion', label: 'Configuración', icon: Settings },
 ]
 
 function getPageTitle(pathname: string) {
   if (pathname === '/dashboard') return 'Operación de hoy'
   if (pathname === '/agenda') return 'Agenda'
   if (pathname === '/pacientes') return 'Pacientes'
+  if (pathname === '/ortodoncia') return 'Ortodoncia'
+  if (pathname === '/finanzas') return 'Finanzas'
+  if (pathname === '/inventario') return 'Inventario'
+  if (pathname === '/configuracion') return 'Configuración'
   if (pathname.endsWith('/atencion')) return 'Atención clínica'
   if (pathname.startsWith('/pacientes/')) return 'Ficha del paciente'
   return 'BRACKET'
@@ -103,10 +111,8 @@ function Rail({ onNavigate }: { onNavigate?: () => void }) {
         ))}
       </nav>
 
-      <div className="space-y-1.5">
-        <button className="focus-ring flex min-h-12 w-full items-center justify-center rounded-xl text-[#747477] transition hover:bg-[#F1EEE8] hover:text-bracket-ink" title="Configuración">
-          <Settings size={20} strokeWidth={1.8} />
-        </button>
+      <div className="space-y-2">
+        <div className="mx-auto h-px w-8 bg-bracket-border" />
         <div className="mx-auto grid h-10 w-10 place-items-center rounded-full bg-[#ECE6DD] text-xs font-bold text-bracket-red">
           NF
         </div>
@@ -184,10 +190,68 @@ function Shell() {
             <Route path="/pacientes" element={<PatientsPage />} />
             <Route path="/pacientes/:patientId" element={<PatientDetailPage />} />
             <Route path="/pacientes/:patientId/atencion" element={<ClinicalPage />} />
+            <Route path="/ortodoncia" element={<ModuleSkeletonPage module="Ortodoncia" eyebrow="Casos longitudinales" description="Casos ortodónticos, controles y seguimiento clínico." sections={['Casos activos', 'Próximos controles', 'Saneamiento', 'Historial del caso']} />} />
+            <Route path="/finanzas" element={<ModuleSkeletonPage module="Finanzas" eyebrow="Operación administrativa" description="Caja, presupuestos, cargos, pagos y estado de cuenta." sections={['Caja', 'Presupuestos', 'Cargos y pagos', 'Estado de cuenta']} />} />
+            <Route path="/inventario" element={<ModuleSkeletonPage module="Inventario" eyebrow="Control operativo" description="Productos, lotes, movimientos, Kardex y alertas." sections={['Productos', 'Lotes y vencimientos', 'Movimientos', 'Kardex y alertas']} />} />
+            <Route path="/configuracion" element={<ModuleSkeletonPage module="Configuración" eyebrow="Administración" description="Personal, sillones y catálogo clínico del sistema." sections={['Personal', 'Sillones odontológicos', 'Catálogo y tarifario']} />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>
+    </div>
+  )
+}
+
+function ModuleSkeletonPage({
+  module,
+  eyebrow,
+  description,
+  sections,
+}: {
+  module: string
+  eyebrow: string
+  description: string
+  sections: string[]
+}) {
+  return (
+    <div className="space-y-5">
+      <section className="flex flex-col justify-between gap-4 border-b border-bracket-border pb-5 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[.12em] text-bracket-gold">{eyebrow}</p>
+          <h2 className="mt-1 text-[28px] font-semibold tracking-[-.035em]">{module}</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-bracket-secondary">{description}</p>
+        </div>
+        <span className="inline-flex min-h-9 items-center self-start rounded-full border border-[#E8DCC6] bg-[#FFF9ED] px-3 text-[11px] font-semibold text-[#8D6A2D]">
+          Estructura base
+        </span>
+      </section>
+
+      <section className="surface overflow-hidden">
+        <div className="border-b border-bracket-border bg-[#FBFAF7] px-5 py-3">
+          <p className="text-xs font-semibold text-bracket-secondary">Áreas previstas</p>
+        </div>
+        <div className="divide-y divide-bracket-border">
+          {sections.map((section, index) => (
+            <div key={section} className="grid min-h-[72px] grid-cols-[44px_1fr_auto] items-center gap-3 px-5">
+              <div className="grid h-9 w-9 place-items-center rounded-lg bg-[#F3F1EC] text-xs font-bold text-bracket-secondary">
+                {String(index + 1).padStart(2, '0')}
+              </div>
+              <div>
+                <p className="text-sm font-semibold">{section}</p>
+                <p className="mt-1 text-xs text-bracket-secondary">Se detallará después de la validación funcional y clínica.</p>
+              </div>
+              <ChevronRight size={18} className="text-[#AAA6A1]" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-dashed border-[#D6D0C7] bg-[rgba(255,255,255,.45)] p-5">
+        <p className="text-sm font-semibold">Qué estamos validando ahora</p>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-bracket-secondary">
+          Sólo estructura, jerarquía y navegación. Los formularios, reglas de negocio, estados y acciones finales se diseñarán módulo por módulo después de la reunión con BRACKET.
+        </p>
+      </section>
     </div>
   )
 }
@@ -577,6 +641,9 @@ function ClinicalPage() {
 
   return (
     <div className="space-y-4">
+      <NavLink to="/pacientes/ana-torres" className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-bracket-secondary transition hover:bg-white hover:text-bracket-ink">
+        <ChevronLeft size={16} /> Ficha del paciente
+      </NavLink>
       <PatientContext />
 
       <div className="scrollbar-none overflow-x-auto border-b border-bracket-border">
