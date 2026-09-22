@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+  color: #1D1D1F;
+  background: #F5F3EE;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { min-height: 100%; margin: 0; }
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(183,146,74,.08), transparent 22rem),
+    #F5F3EE;
+}
+
+button, input, select, textarea { font: inherit; }
+
+button { -webkit-tap-highlight-color: transparent; }
+
+::selection {
+  background: #F8EAEC;
+  color: #681923;
+}
+
+@layer components {
+  .surface {
+    @apply rounded-2xl border border-bracket-border bg-white;
+  }
+
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bracket-red/20 focus-visible:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-bracket-red px-4 text-sm font-semibold text-white transition active:scale-[.985] hover:bg-bracket-redHover;
+  }
+
+  .btn-secondary {
+    @apply focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#D4CEC3] bg-white px-4 text-sm font-semibold text-bracket-ink transition active:scale-[.985] hover:bg-[#F3F1EC];
+  }
+
+  .status-dot {
+    @apply inline-block h-2 w-2 rounded-full;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+}
