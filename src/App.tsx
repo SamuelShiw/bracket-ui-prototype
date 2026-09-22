@@ -35,16 +35,15 @@ const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/agenda', label: 'Agenda', icon: CalendarDays },
   { to: '/pacientes', label: 'Pacientes', icon: Users },
-  { to: '/clinica', label: 'Atención clínica', icon: Stethoscope },
-  { to: '/odontograma', label: 'Odontograma', icon: Activity },
 ]
 
-const pageTitles: Record<string, string> = {
-  '/dashboard': 'Operación de hoy',
-  '/agenda': 'Agenda',
-  '/pacientes': 'Pacientes',
-  '/clinica': 'Atención clínica',
-  '/odontograma': 'Odontograma',
+function getPageTitle(pathname: string) {
+  if (pathname === '/dashboard') return 'Operación de hoy'
+  if (pathname === '/agenda') return 'Agenda'
+  if (pathname === '/pacientes') return 'Pacientes'
+  if (pathname.endsWith('/atencion')) return 'Atención clínica'
+  if (pathname.startsWith('/pacientes/')) return 'Ficha del paciente'
+  return 'BRACKET'
 }
 
 function BrandMark({ compact = false }: { compact?: boolean }) {
@@ -118,7 +117,7 @@ function Rail({ onNavigate }: { onNavigate?: () => void }) {
 
 function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const location = useLocation()
-  const title = pageTitles[location.pathname] ?? 'BRACKET'
+  const title = getPageTitle(location.pathname)
 
   return (
     <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-bracket-border bg-[rgba(251,250,247,.88)] px-5 backdrop-blur-xl lg:px-7">
@@ -183,8 +182,8 @@ function Shell() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/agenda" element={<AgendaPage />} />
             <Route path="/pacientes" element={<PatientsPage />} />
-            <Route path="/clinica" element={<ClinicalPage />} />
-            <Route path="/odontograma" element={<OdontogramPage />} />
+            <Route path="/pacientes/:patientId" element={<PatientDetailPage />} />
+            <Route path="/pacientes/:patientId/atencion" element={<ClinicalPage />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
@@ -447,7 +446,7 @@ function PatientsPage() {
           {patients.map((patient) => (
             <NavLink
               key={patient.name}
-              to="/clinica"
+              to="/pacientes/ana-torres"
               className="focus-ring grid min-h-[72px] grid-cols-[1fr_auto] items-center gap-3 px-5 transition hover:bg-[#FCFBF8] md:grid-cols-[1.2fr_.8fr_1fr_1fr_44px]"
             >
               <div className="flex items-center gap-3">
@@ -474,9 +473,15 @@ function PatientsPage() {
   )
 }
 
-const clinicalTabs = ['Resumen', 'Historia', 'Anamnesis', 'Odontograma', 'Tratamientos', 'Radiografías', 'Consentimientos']
+const clinicalTabs = ['Resumen', 'Historia', 'Anamnesis', 'Odontograma', 'Evolución', 'Tratamientos', 'Radiografías', 'Consentimientos']
 
-function PatientContext({ section = 'Atención clínica' }: { section?: string }) {
+function PatientContext({
+  section = 'Atención clínica',
+  status = 'En atención',
+}: {
+  section?: string
+  status?: string | null
+}) {
   return (
     <div className="surface overflow-hidden">
       <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -485,7 +490,7 @@ function PatientContext({ section = 'Atención clínica' }: { section?: string }
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold">Ana Torres</h2>
-              <StatusBadge tone="info">En atención</StatusBadge>
+              {status && <StatusBadge tone="info">{status}</StatusBadge>}
             </div>
             <p className="mt-1 text-xs text-bracket-secondary">HC-00124 · DNI 74581236 · 27 años</p>
           </div>
@@ -495,6 +500,74 @@ function PatientContext({ section = 'Atención clínica' }: { section?: string }
           <p className="mt-1 text-sm font-semibold">Dra. Nataly Frías · 10:00</p>
         </div>
       </div>
+    </div>
+  )
+}
+
+function PatientDetailPage() {
+  const [tab, setTab] = useState('Resumen')
+
+  return (
+    <div className="space-y-4">
+      <PatientContext section="Ficha del paciente" status={null} />
+
+      <div className="scrollbar-none overflow-x-auto border-b border-bracket-border">
+        <div className="flex min-w-max gap-1">
+          {['Resumen', 'Historia clínica', 'Anamnesis', 'Odontograma', 'Tratamientos', 'Radiografías', 'Consentimientos'].map((item) => (
+            <button
+              key={item}
+              onClick={() => setTab(item)}
+              className={`focus-ring relative min-h-11 px-3 text-sm font-semibold transition ${tab === item ? 'text-bracket-red' : 'text-bracket-secondary hover:text-bracket-ink'}`}
+            >
+              {item}
+              {tab === item && <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-bracket-red" />}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {tab === 'Resumen' ? (
+        <div className="grid gap-4 xl:grid-cols-[1.4fr_.8fr]">
+          <section className="surface p-5">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[.1em] text-bracket-gold">Resumen del paciente</p>
+                <h3 className="mt-1 text-xl font-semibold tracking-[-.025em]">Información clínica reciente</h3>
+              </div>
+              <NavLink to="/pacientes/ana-torres/atencion" className="btn-primary self-start">
+                <Stethoscope size={17} /> Continuar atención
+              </NavLink>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <ClinicalTile icon={CalendarDays} title="Próxima cita" text="24 Sep 2026 · 09:00" />
+              <ClinicalTile icon={ClipboardList} title="Última atención" text="18 Sep 2026 · Dra. Nataly Frías" />
+              <ClinicalTile icon={Activity} title="Odontograma" text="Inicial registrado · 2 evoluciones" />
+              <ClinicalTile icon={FileImage} title="Estudios" text="1 radiografía panorámica" />
+            </div>
+          </section>
+
+          <aside className="surface p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[.1em] text-bracket-gold">Acceso clínico</p>
+            <h3 className="mt-1 text-base font-semibold">La atención se abre desde el paciente o una cita</h3>
+            <p className="mt-3 text-sm leading-6 text-bracket-secondary">
+              Historia, anamnesis, odontograma, evolución y tratamientos pertenecen al contexto clínico del paciente, no a la navegación global.
+            </p>
+          </aside>
+        </div>
+      ) : (
+        <section className="surface p-6">
+          <p className="text-sm font-semibold">{tab}</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-bracket-secondary">
+            Vista de consulta del expediente. Las acciones clínicas de registro se realizan desde una atención en curso.
+          </p>
+          {tab === 'Odontograma' && (
+            <NavLink to="/pacientes/ana-torres/atencion" className="btn-secondary mt-5">
+              <Stethoscope size={17} /> Abrir en atención clínica
+            </NavLink>
+          )}
+        </section>
+      )}
     </div>
   )
 }
@@ -521,52 +594,46 @@ function ClinicalPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[1.45fr_.7fr]">
-        <section className="surface p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[.1em] text-bracket-gold">Atención actual</p>
-              <h3 className="mt-1 text-xl font-semibold tracking-[-.025em]">{tab}</h3>
-            </div>
-            <button className="btn-secondary">Editar</button>
-          </div>
-
-          {tab === 'Resumen' ? (
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <ClinicalTile icon={ClipboardList} title="Motivo de consulta" text="Control clínico programado." />
-              <ClinicalTile icon={ShieldCheck} title="Anamnesis" text="Revisada · 18 Sep 2026" />
-              <ClinicalTile icon={Activity} title="Odontograma" text="Inicial registrado · 2 evoluciones" />
-              <ClinicalTile icon={FileImage} title="Estudios" text="1 radiografía panorámica" />
-            </div>
-          ) : (
-            <div className="mt-6">
-              <div className="rounded-xl border border-dashed border-[#D4CEC3] bg-[#FBFAF7] p-8 text-center">
-                <p className="text-sm font-semibold">Vista conceptual de {tab}</p>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-bracket-secondary">Esta sección forma parte del prototipo de experiencia clínica y se conectará al backend después de su validación.</p>
+      {tab === 'Odontograma' ? (
+        <OdontogramPanel />
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-[1.45fr_.7fr]">
+          <section className="surface p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[.1em] text-bracket-gold">Atención actual</p>
+                <h3 className="mt-1 text-xl font-semibold tracking-[-.025em]">{tab}</h3>
               </div>
+              <button className="btn-secondary">Editar</button>
             </div>
-          )}
-        </section>
 
-        <aside className="space-y-4">
-          <div className="surface p-5">
-            <h3 className="text-sm font-semibold">Contexto</h3>
+            {tab === 'Resumen' ? (
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <ClinicalTile icon={ClipboardList} title="Motivo de consulta" text="Control clínico programado." />
+                <ClinicalTile icon={ShieldCheck} title="Anamnesis" text="Revisada · 18 Sep 2026" />
+                <ClinicalTile icon={Activity} title="Odontograma" text="Inicial registrado · 2 evoluciones" />
+                <ClinicalTile icon={FileImage} title="Estudios" text="1 radiografía panorámica" />
+              </div>
+            ) : (
+              <div className="mt-6">
+                <div className="rounded-xl border border-dashed border-[#D4CEC3] bg-[#FBFAF7] p-8 text-center">
+                  <p className="text-sm font-semibold">Vista conceptual de {tab}</p>
+                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-bracket-secondary">Esta sección forma parte del prototipo de experiencia clínica y se conectará al backend después de su validación.</p>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <aside className="surface p-5">
+            <h3 className="text-sm font-semibold">Contexto de la atención</h3>
             <dl className="mt-4 space-y-3 text-sm">
               <Meta label="Cita relacionada" value="Hoy · 10:00" />
               <Meta label="Profesional" value="Dra. Nataly Frías" />
               <Meta label="Estado" value="En atención" />
             </dl>
-          </div>
-
-          <NavLink to="/odontograma" className="surface focus-ring flex min-h-[82px] items-center justify-between p-5 transition hover:border-[#CCB8BA] hover:bg-[#FCF8F8]">
-            <div>
-              <p className="text-sm font-semibold">Abrir odontograma</p>
-              <p className="mt-1 text-xs text-bracket-secondary">Vista esquemática FDI</p>
-            </div>
-            <ChevronRight size={19} className="text-bracket-red" />
-          </NavLink>
-        </aside>
-      </div>
+          </aside>
+        </div>
+      )}
     </div>
   )
 }
@@ -613,14 +680,11 @@ function Tooth({ number, selected, marked, onClick }: { number: string; selected
   )
 }
 
-function OdontogramPage() {
+function OdontogramPanel() {
   const [selected, setSelected] = useState('16')
   const selectedName = useMemo(() => `Pieza ${selected}`, [selected])
 
   return (
-    <div className="space-y-4">
-      <PatientContext section="Odontograma" />
-
       <section className="surface overflow-hidden">
         <div className="flex flex-col justify-between gap-3 border-b border-bracket-border px-5 py-4 sm:flex-row sm:items-center">
           <div>
@@ -690,7 +754,6 @@ function OdontogramPage() {
           </div>
         </div>
       </section>
-    </div>
   )
 }
 
